@@ -1,5 +1,5 @@
-create database 1BM21CS123_driving_insurance;
-use 1BM21CS123_driving_insurance;
+create database OVHAY122_Insurance;
+use OVHAY122_Insurance;
 show tables;
 
 create table PERSON
@@ -47,10 +47,45 @@ create table PARTICIPATED
 );
 
 insert into ACCIDENT
-values();
+values('11','2003-02-01','MYSORE ROAD');
 
 insert into CAR
-values();
+values('KA052250','INDICA','1990');
 
 insert into PERSON
-values();
+values('A01','RICHARD','SHRINIVAS NAGAR');
+
+insert into owns
+values('A01','KA052250');
+
+insert into participated
+values('A01','KA052250','11','10000');
+
+SELECT*
+FROM car order by YEAR asc;
+
+SELECT count(REPORT_NUM)
+
+FROM car c,participated p
+where c.REG_NUM=p.REG_NUM and c.MODEL='LANCER';
+
+SELECT COUNT(DISTINCT DRIVER_ID) cnt
+FROM participated a,accident b
+where a.REPORT_NUM=b.REPORT_NUM and b.ACCIDENT_DATE like'__08%';
+select*
+from participated 
+where DAMAGE_AMOUNT < (select t.amt from(select avg(DAMAGE_AMOUNT)as amt from participated)t);
+
+select avg(DAMAGE_AMOUNT)
+from participated;
+
+delete from participated 
+where DAMAGE_AMOUNT < (select t.amt from(select avg(DAMAGE_AMOUNT)as amt from participated)t);
+
+select *
+from participated order by DAMAGE_AMOUNT desc;
+
+
+
+
+
