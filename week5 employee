@@ -1,122 +1,152 @@
-
-create database if not exists 1bm21cs122_employee;
-use 1bm21cs122_employee;
-show tables;
-
-create table dept(
-deptno int,
-dname varchar(20),
-dloc varchar(10),
-primary key (deptno)
-);
-
-insert into dept
-values(1,'Logistics','Bengaluru'),
-(2,'Statistics','Mysuru'),
-(3,'Marketing','Hyderabad'),
-(4,'Design','Bengaluru'),
-(5,'Management','Mysuru'),
-(6,'Finance','Bombay');
-
-select * from dept;
-
-create table project(
-pno int,
-ploc varchar(20),
-pname varchar(20),
-primary key (pno)
-);
-
-insert into project
-values(01,'Hyderabad','Project_Zero'),
-(02,'Mysuru','Project_Alpha'),
-(03,'Hyderabad','Project_Bozo'),
-(04,'Bengaluru','Project_Waaris'),
-(05,'Bombay','Project_Onslaught'),
-(06,'Mysuru','Project_DivideBY');
-
-select * from project;
-
-create table incentives(
-empno int,
-incentive_date date,
-incentive_amount int,
-primary key (empno,incentive_date),
-foreign key (empno) references employee(empno)
-on delete cascade on update cascade
-);
-
-drop table incentives;
-
-insert into incentives
-values(101,'2022-10-01',5000),
-(106,'2022-11-02',7000),
-(102,'2022-05-03',5000),
-(105,'2022-07-05',5000),
-(110,'2022-08-07',9000);
-
-select * from incentives;
+create database 122employee_database;
+use 122employee_database;
 
 create table employee(
-empno int,
-ename varchar(20),
+emp_no int primary key,
+ename varchar(40),
 mgr_no int,
-hiredate date,
+hire_date date,
 sal int,
-deptno int,
-primary key (empno),
-foreign key (deptno) references dept (deptno)
-on delete cascade on update cascade
+dept_no int,
+foreign key (dept_no) references department(dept_no) on delete cascade
 );
 
+
+
+
+create table department(
+dept_no int primary key,
+d_name varchar(40),
+d_loc varchar(40)
+);
+
+create table incentives(
+emp_no int,
+incentive_date date,
+incentive_amt int,
+primary key(emp_no,incentive_date),
+foreign key(emp_no) references employee(emp_no) on delete cascade
+);
+
+create table project(
+p_no int primary key,
+p_loc varchar(40),
+p_name varchar(40)
+);
+
+
+create table assigned_to(
+emp_no int,
+p_no int,
+job_role varchar(40),
+primary key(emp_no,p_no),
+foreign key(emp_no) references employee(emp_no) on delete cascade,
+foreign key(p_no) references project(p_no) on delete cascade
+);
+
+desc department;
+
+
+desc employee;
+
+desc incentives;
+
+desc project;
+
+desc assigned_to;
+
+drop table employee;
+drop table incentives;
+drop table assigned_to;
+
+
+insert into department
+values(1,'Logistics','bengaluru'),(2,'Statistics','mysuru'),(3,'Marketing','hyderabad'),(4,'Design','bengaluru'),(5,'Management','mysuru'),(6,'Finance','bombay');
+
+
+select * from department;
+
+
 insert into employee
-values(101,'Avinash',2310,'2021-10-09',56000,1),
-(102,'Dinesh',2317,'2021-03-07',96000,1),
-(103,'Balaji',2510,'2021-10-08',66000,1),
-(104,'Sovesh',9310,'2021-02-09',42000,2),
-(105,'Sordelu',3310,'2021-03-04',76000,2),
-(106,'Hasbulla',5561,'2022-01-05',47900,3),
-(107,'Tacitus Kilgore',7810,'2021-11-19',420000,4),
-(108,'Govardhan Prasad',4231,'2021-02-13',327100,5),
-(109,'Champika',1324,'2021-07-14',87600,5),
-(110,'Robin',6780,'2021-12-31',123000,5);
+values(7499,'Shruthi',7698,'2013-02-20',16000,1),(7521,'Anvitha',7698,'2015-02-22',12500,1),(7566,'Tanvir',7839,'2008-08-02',29750,1),(7654,'Ramesh',7698,'2014-09-28',12500,2),(7698,'Kumar',7839,'2015-05-01',28500,2),(7782,'Clark',7839,'2017-06-09',30000,3),(7839,'Tacitus_Kilgore',NULL,'2009-11-17',50000,4),(7876,'Gowardana_Prasad',7788,'2013-01-12',11000,5),(7902,'Saritha',7566,'2010-12-03',30000,5);
 
 select * from employee;
 
-create table assigned_to(
-empno int,
-pno int,
-job_role varchar(20),
-primary key(empno,pno),
-foreign key(empno) references employee(empno)
-on delete cascade on update cascade,
-foreign key(pno) references project(pno)
-on delete cascade on update cascade
-);
+insert into incentives
+values(7499,'2019-02-01',5000),(7521,'2019-02-02',8000),(7566,'2019-03-01',2500),(7654,'2022-02-01',5000),(7698,'2019-05-21',9000);
+
+select * from incentives;
+
+
+insert into project
+values(01,'hyderabad','Project_Zero'),(02,'mysuru','Project_alpha'),(03,'hyderabad','Project_Bozo'),(04,'bengaluru','Project_Waaris'),(05,'bombay','Project_Onslaught'),(06,'mysuru','Project_DivideBY');
+
+
+select * from project;
+
 
 insert into assigned_to
-values(101,01,'Developer'),
-(103,04,'Tester'),
-(102,05,'Manager'),
-(105,03,'Supervisor'),
-(107,02,'Team Leader'),
-(106,06,'Executive Manager');
+values(7499,01,'Candidate'),(7521,04,'Candidate'),(7698,05,'Manager'),(7566,03,'Supervisor'),(7654,02,'Candidate'),(7902,06,'Candidate');
 
 
 select * from assigned_to;
 
-#q3
-select a.empno
-from assigned_to a, project p
-where a.pno = p.pno and p.ploc in ('Hyderabad','Mysuru','Bengaluru');
+SELECT 
+    E.ename
+FROM
+    employee E
+WHERE
+    E.emp_no IN (SELECT 
+            P.mgr_no
+        FROM
+            employee P
+        WHERE
+            sal > (SELECT 
+                    AVG(sal)
+                FROM
+                    employee G
+                WHERE
+                    G.mgr_no = E.emp_no));
 
-#q4
-select e.empno
-from employee e
-where e.empno not in (select empno
-from incentives);
 
-#q5
-select e.ename, e.empno, d.dname, a.job_role, d.dloc, p.ploc
-from dept d, employee e, assigned_to a, project p
-where e.empno = a.empno and a.pno = p.pno and e.deptno = d.deptno and d.dloc = p.ploc;
+
+
+SELECT 
+    m.ename, COUNT(*)
+FROM
+    employee e,
+    employee m
+WHERE
+    e.mgr_no = m.emp_no
+GROUP BY m.ename
+HAVING COUNT(*) = (SELECT 
+        MAX(mycount)
+    FROM
+        (SELECT 
+            COUNT(*) mycount
+        FROM
+            employee
+        GROUP BY mgr_no) a);
+
+
+
+
+SELECT 
+    E.ename
+FROM
+    employee E,
+    employee M
+WHERE
+    E.mgr_no = M.emp_no
+        AND M.dept_no = E.dept_no;
+
+
+SELECT 
+    E.emp_no, E.ename, E.dept_no
+FROM
+    employee E,
+    incentives I
+WHERE
+    E.emp_no = I.emp_no
+        AND incentive_date LIKE '2019-02%';
+
