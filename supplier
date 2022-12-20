@@ -1,0 +1,94 @@
+create database 1bm21cs122supplier; 
+create table supplier(
+sid int not null primary key,
+sname varchar(50),
+city varchar(50)
+);
+create table parts(
+pid int not null primary key,
+pname VARCHAR(30),
+color varchar(30)
+);
+create table catalog(
+sid int ,
+pid int,
+cost real,
+foreign key(sid) references supplier(sid),
+foreign key(pid) references parts(pid)
+
+);
+insert into supplier values(10001,'acme widget','bangalore');
+insert into supplier values(10002,'johns','kolkata');
+insert into supplier values(10003,'vimal','mumbai');
+insert into supplier values(10004,'reliance','delhi');
+
+insert into parts values(20001,'book','red');
+insert into parts values(20002,'pen','red');
+insert into parts values(20003,'pencil','green');
+insert into parts values(20004,'mobile','green');
+insert into parts values(20005,'charger','black');
+
+insert into catalog values(10001,20001,10);
+insert into catalog values(10001,20002,10);
+insert into catalog values(10001,20003,30);
+insert into catalog values(10001,20004,10);
+insert into catalog values(10001,20005,10);
+insert into catalog values(10002,20001,10);
+insert into catalog values(10002,20002,20);
+insert into catalog values(10003,20003,30);
+insert into catalog values(10004,20003,40);
+
+
+
+
+
+
+select pname from parts where pid IN (select pid from catalog);
+
+
+
+select sname from
+(select c.sname,count(distinct a.pid) as cnt from catalog a
+left join parts b on a.pid=b.pid
+left join supplier c on c.sid=a.sid group by 1) a
+where cnt=(select count(distinct a.pid) from catalog a
+left join parts b on a.pid=b.pid);
+
+
+
+
+select distinct sname from
+(select c.sname,b.pname,b.color from catalog a
+left join parts b on a.pid=b.pid
+left join supplier c on c.sid=a.sid )a
+where color='red';
+
+
+
+select A.pname from parts A
+left join catalog B on A.pid=B.pid
+left join supplier C on B.sid=C.sid where lower(c.sname)='acme widget'
+and a.pname not in (select A.pname from parts A
+left join catalog B on A.pid=B.pid
+left join supplier C on B.sid=C.sid where lower(c.sname)<>'acme widget');
+
+
+select a.sid from
+(select A.pid,C.sid,cost from parts A  
+left join catalog B on A.pid=B.pid
+left join supplier C on B.sid=C.sid )A
+left join
+(select A.pid,avg(cost) as cost from parts A
+left join catalog B on A.pid=B.pid
+left join supplier C on B.sid=C.sid where cost is not null group by 1 )B on A.pid=B.pid
+where a.cost>b.cost;
+
+
+
+select pid,sname from
+(select A.pid,C.sname,cost,rank() over(partition by pid order by cost desc) as rnk from parts A
+left join catalog B on A.pid=B.pid
+left join supplier C on B.sid=C.sid)A where rnk=1 and cost is not null order by sname;
+
+
+
